@@ -3,22 +3,36 @@
 cd $(dirname $0)
 cd ../tmp
 
-# 逐个下载，解压，编译，复制
 mkdir -p sdk
 rm -rf sdk/*
 mkdir -p bin
 rm -rf bin/*
 cd sdk
+cp ../sdk_download.txt .
+aria2c -i sdk_download.txt -j 1
+
+mkdir ../package
+git clone git@github.com:CHN-beta/xmurp-ua.git ../package/xmurp-ua
+
+cat ../sdk_list.txt | while read line
+do
+	{
+		sdk=$(echo $line | awk '{print $3}')
+		tar -xf $sdk
+	} &
+	sleep 2
+done
+wait
+
+# 逐个编译，复制
 cat ../sdk_list.txt | while read line
 do
 	sub1=$(echo $line | awk '{print $1}')
 	sub2=$(echo $line | awk '{print $2}')
 	sdk=$(echo $line | awk '{print $3}')
 	url=$(echo $line | awk '{print $4}')
-	aria2c $url
-	tar -xf $sdk
 	cd ${sdk%.tar*}
-	git clone git@github.com:CHN-beta/xmurp-ua.git package/xmurp-ua
+	cp -r ../../package/xmurp-ua package/xmurp-ua
 	rm -rf staging_dir/host/bin
 	ln -s /usr/bin staging_dir/host/
 	make defconfig
