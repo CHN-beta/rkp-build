@@ -1,7 +1,7 @@
 #/bin/bash
 
 cd $(dirname $0)
-cd ..
+cd ../..
 mkdir -p tmp
 rm -rf tmp/*
 cd tmp
@@ -19,7 +19,7 @@ do
 	echo $sub11$sub2
 	for sub22 in $sub2
 	do
-		sdk=$(curl $base_url$sub11$sub22 | grep '<tr><td class="n">' | awk '{split($0,b,'"\"\\\"\""');print b[4]}' | grep openwrt-sdk)
+		sdk=$(curl $base_url$sub11$sub22 | grep '<tr><td class="n">' | awk '{split($0,b,'"\"\\\"\""');print b[4]}' | grep lede-sdk)
 		echo "$sub11 $sub22 $sdk $base_url$sub11$sub22$sdk" >> sdk_list.txt
 		echo $base_url$sub11$sub22$sdk >> sdk_download.txt
 	done

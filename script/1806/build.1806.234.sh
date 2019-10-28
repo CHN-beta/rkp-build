@@ -1,7 +1,7 @@
 #/bin/bash
 
 cd $(dirname $0)
-cd ../tmp
+cd ../../tmp
 
 mkdir -p sdk
 rm -rf sdk/*
@@ -33,8 +33,6 @@ do
 	url=$(echo $line | awk '{print $4}')
 	cd ${sdk%.tar*}
 	cp -r ../../package/xmurp-ua package/xmurp-ua
-	rm -rf staging_dir/host/bin
-	ln -s /usr/bin staging_dir/host/
 	make defconfig
 	make package/xmurp-ua/compile
 	mkdir -p ../../bin/$sub1$sub2
