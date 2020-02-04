@@ -1,23 +1,35 @@
-#/bin/bash
+#!/bin/bash
 
-echo -n "" > sdk_list.txt
-echo -n "" > sdk_download.txt
+rm -f list.txt
+touch list.txt
 
-# 抓取所有 SDK 下载地址
-base_url=$1
-echo $base_url
-sub1=$(curl $base_url | grep '<tr><td class="n">' | awk '{split($0,b,'"\"\\\"\""');print b[4]}')
-echo $sub1
-for sub11 in $sub1
+base_url="https://downloads.openwrt.org/releases/"
+echo "base_url=$base_url"
+
+# 抓取所有系统版本
+versions=$(curl -s $base_url | grep '<tr><td class="n">' | awk '{split($0,b,'"\"\\\"\""');print b[4]}' | grep -v faillogs | grep -v packages | grep 17.01)
+versions=${versions//\// }
+versions=$(echo $versions | xargs echo)
+echo -e " versions: $versions"
+
+for version in $versions
 do
-	sub2=$(curl $base_url$sub11 | grep '<tr><td class="n">' | awk '{split($0,b,'"\"\\\"\""');print b[4]}')
-	echo $sub11$sub2
-	for sub22 in $sub2
-	do
-		sdk=$(curl $base_url$sub11$sub22 | grep '<tr><td class="n">' | awk '{split($0,b,'"\"\\\"\""');print b[4]}' | grep openwrt-sdk)
-		echo "$sub11 $sub22 $sdk $base_url$sub11$sub22$sdk" >> sdk_list.txt
-		echo $base_url$sub11$sub22$sdk >> sdk_download.txt
-	done
+    targets=$(curl -s $base_url$version/targets/ | grep '<tr><td class="n">' | awk '{split($0,b,'"\"\\\"\""');print b[4]}')
+    targets=${targets//\// }
+    targets=$(echo $targets | xargs echo)
+    echo "  targets: $targets"
+    for target in $targets
+    do
+        subtargets=$(curl -s $base_url$version/targets/$target/ | grep '<tr><td class="n">' | awk '{split($0,b,'"\"\\\"\""');print b[4]}')
+        subtargets=${subtargets//\// }
+        subtargets=$(echo $subtargets | xargs echo)
+        echo "   subtargets: $subtargets"
+        for subtarget in $subtargets
+        do
+            sdk=$(curl -s $base_url$version/targets/$target/$subtarget/ | grep '<tr><td class="n">' | awk '{split($0,b,'"\"\\\"\""');print b[4]}' | grep tar.xz | grep sdk)
+            sdk=${sdk%.tar.xz}
+            echo "    sdk: $sdk"
+            echo "$version $target $subtarget $sdk $base_url$version/targets/$target/$subtarget/$sdk.tar.xz" >> list.txt
+        done
+    done
 done
-
-
