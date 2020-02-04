@@ -7,7 +7,7 @@ base_url="https://downloads.openwrt.org/releases/"
 echo "base_url=$base_url"
 
 # 抓取所有系统版本
-versions=$(curl -s $base_url | grep '<tr><td class="n">' | awk '{split($0,b,'"\"\\\"\""');print b[4]}' | grep -v faillogs | grep -v packages | grep 17.01)
+versions=$(curl -s $base_url | grep '<tr><td class="n">' | awk '{split($0,b,'"\"\\\"\""');print b[4]}' | grep -v faillogs | grep -v packages | grep -v 17.01)
 versions=${versions//\// }
 versions=$(echo $versions | xargs echo)
 echo -e " versions: $versions"
