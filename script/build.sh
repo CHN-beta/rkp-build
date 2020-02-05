@@ -21,9 +21,32 @@ do
     make defconfig >> ../compile.log 2>&1
     make package/xmurp-ua/compile V=sc >> ../compile.log 2>&1
 
+    # 检查
+    if [ ! -f bin/targets/$target/$subtarget/packages/kmod-* ]
+    then
+        echo "here may build failed. ipk not found." | tee -a ../status.log
+    else
+        mkdir test
+        cp bin/targets/$target/$subtarget/packages/kmod-* test/
+        cd test
+        mv kmod-* test.tar
+        tar -xf test.tar
+        if [ ! -f data.tar.gz ]
+        then
+            echo "here may build failed. data.tar.gz not found." | tee -a ../status.log
+        else
+            tar -xf data.tar.gz
+            if [ ! -f lib/modules/*/*.ko ]
+            then
+                echo "here may build failed. ko not found." | tee -a ../status.log
+            fi
+        fi
+        cd ..
+    fi
+
     # 整理，清理
-    mkdir -p ../bin/$version
-    cp -r bin/targets/* ../bin/$version/
+    mkdir -p ../bin/$version/$target/$subtarget
+    cp bin/targets/$target/$subtarget/packages/kmod-* ../bin/$version/$target/$subtarget/
     cd ..
     rm -rf $sdk*
 done
