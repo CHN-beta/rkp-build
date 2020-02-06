@@ -66,6 +66,7 @@ do
     # 整理，清理
     cp bin/targets/$target/$subtarget*/packages/* bin/targets/$target/$subtarget*/
     rm -r bin/targets/$target/$subtarget*/packages
+    mkdir -p ../bin/$version
     cp -r bin/targets/* ../bin/$version/
     cd ..
     rm -rf $sdk*
