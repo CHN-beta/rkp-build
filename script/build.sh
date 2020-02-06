@@ -16,18 +16,37 @@ do
     cd $sdk
     git clone -q https://github.com/CHN-beta/xmurp-ua.git package/xmurp-ua
 
+    # 准备编译参数
+    make defconfig >> compile.log 2>&1
+    args="package/xmurp-ua/compile V=sc"
+    # 17.01.x 以前的需要加参数
+    result=$(echo $version | grep 17.01)
+    if [ ! -z "$result" ]
+    then
+        arch=$(cat .config | grep CONFIG_ARCH= | awk '{split($0,b,'"\"\\\"\""');print b[2]}')
+        cross_compile="$(pwd)/staging_dir/$(ls staging_dir | grep toolchain)/bin/$arch-openwrt-linux-"
+        args="$args ARCH=$arch CROSS_COMPILE=$cross_compile"
+        # 有时需要增加软链接
+        if [ ! -d "build_dir/target*/linux*/linux*/arch/$arch" ]
+        then
+            cd build_dir/target*/linux*/linux*/arch
+            arch2=$(ls)
+            ln -s $arch2 $arch
+            cd ../../../../..
+        fi
+    fi
+
     # 编译
 	echo $line >> ../compile.log
-    make defconfig >> ../compile.log 2>&1
-    make package/xmurp-ua/compile V=sc >> ../compile.log 2>&1
+    make $args >> ../compile.log 2>&1
 
     # 检查
-    if [ ! -f bin/targets/$target/$subtarget/packages/kmod-* ]
+    if [ ! -f bin/targets/$target/$subtarget*/packages/kmod-* ]
     then
         echo "here may build failed. ipk not found." | tee -a ../status.log
     else
         mkdir test
-        cp bin/targets/$target/$subtarget/packages/kmod-* test/
+        cp bin/targets/$target/$subtarget*/packages/kmod-* test/
         cd test
         mv kmod-* test.tar
         tar -xf test.tar
@@ -45,8 +64,9 @@ do
     fi
 
     # 整理，清理
-    mkdir -p ../bin/$version/$target/$subtarget
-    cp bin/targets/$target/$subtarget/packages/kmod-* ../bin/$version/$target/$subtarget/
+    cp bin/targets/$target/$subtarget*/packages/* bin/targets/$target/$subtarget*/
+    rm -r bin/targets/$target/$subtarget*/packages
+    cp -r bin/targets/* ../bin/$version/
     cd ..
     rm -rf $sdk*
 done
