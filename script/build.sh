@@ -25,15 +25,15 @@ do
     then
         arch=$(cat .config | grep CONFIG_ARCH= | awk '{split($0,b,'"\"\\\"\""');print b[2]}')
         cross_compile="$(pwd)/staging_dir/$(ls staging_dir | grep toolchain)/bin/$arch-openwrt-linux-"
-        args="$args ARCH=$arch CROSS_COMPILE=$cross_compile"
         # 有时需要增加软链接
-        if [ ! -d "build_dir/target*/linux*/linux*/arch/$arch" ]
+        if [ ! -d "build_dir/target*/linux*/linux*/arch/$arch" -a "$arch" = "mipsel" ]
         then
-            cd build_dir/target*/linux*/linux*/arch
-            arch2=$(ls)
-            ln -s $arch2 $arch
-            cd ../../../../..
+            arch=$(ls build_dir/target*/linux*/linux*/arch)
+            target=$(ls build_dir)
+            target_new=${target//mipsel/$arch}
+            ln -s ./$target build_dir/$target_new
         fi
+        args="$args ARCH=$arch CROSS_COMPILE=$cross_compile"
     fi
 
     # 编译
