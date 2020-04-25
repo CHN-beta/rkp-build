@@ -18,7 +18,7 @@ download() {
         cd sdk/$version/$target/$subtarget
         curl -O --retry 99 $url
         tar -xvf $sdk.tar.xz
-        rm -rf $sdk.tar.gz
+        rm -rf $sdk.tar.xz
     fi
 }
 
