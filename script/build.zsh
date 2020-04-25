@@ -17,9 +17,9 @@ do
             for package in $(ls $build_dir/package)
 	    do
                 make package/$package/compile V=sc -j8
+                mkdir -p $build_dir/bin/$package/$version/$target/$subtarget
+                cp bin/targets/*/*/packages/*$package*.ipk $build_dir/bin/$package/$version/$target/$subtarget/
             done
-            mkdir -p $build_dir/bin/$version/$target/$subtarget
-            cp bin/targets/*/*/packages/* $build_dir/bin/$version/$target/$subtarget/
         done
     done
 done
