@@ -4,9 +4,15 @@ cd $(dirname $0:A)
 mkdir sdk
 cd sdk
 
-for img in $(ls ../../sdk)
+if [ -n "$@" ]
+then
+    sdks="$@"
+else
+    sdks=$(ls ../../sdk | sed 's/\(.*\)\.img/\1/g')
+fi
+
+for sdk in $sdks
 do
-    sdk=$(echo $img | sed 's/\(.*\)\.img/\1/g')
     mkdir $sdk
     mkdir $sdk.upper
     mkdir $sdk.lower

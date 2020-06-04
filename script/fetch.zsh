@@ -30,10 +30,15 @@ fetch() {
     base_url="https://downloads.openwrt.org/releases/"
     echo "base_url=$base_url"
 
-    # 抓取所有系统版本
-    versions=$(curl -s $base_url | grep '<tr><td class="n">' | awk '{split($0,b,'"\"\\\"\""');print b[4]}' | grep -v faillogs | grep -v packages | grep 19.07 | grep -v rc)
-    versions=${versions//\// }
-    versions=$(echo $versions | xargs echo)
+    if [ -n "$@" ]
+    then
+        versions=$@
+    else
+        # 抓取所有系统版本
+        versions=$(curl -s $base_url | grep '<tr><td class="n">' | awk '{split($0,b,'"\"\\\"\""');print b[4]}' | grep -v faillogs | grep -v packages | grep 19.07 | grep -v rc)
+        versions=${versions//\// }
+        versions=$(echo $versions | xargs echo)
+    fi
     echo -e " versions: $versions"
 
     for version in $versions
@@ -49,4 +54,4 @@ fetch() {
 }
 
 cd "$(dirname $0:A)"
-fetch
+fetch $@
